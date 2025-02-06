@@ -1,0 +1,10 @@
+name=LCD-I2C-HD44780
+version=2.0.0
+author=Stefan Staub
+maintainer=Stefan Staub <email@domain.com>
+sentence=LCD library for HD44780 compatible display controllers using an i2c expander.
+paragraph=LCD library for HD44780 compatible display controllers using an i2c expander with extended functionality and API
+category=Display
+url=https://github.com/sstaub/LCD-I2C-HD44780
+architectures=*
+includes=LCDi2c.h

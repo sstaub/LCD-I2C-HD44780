@@ -1,6 +1,6 @@
 
 /* Arduino TextLCD Library, for a 4-bit LCD based on HD44780
- * Copyright (c) 2020, sstaub
+ * Copyright (c) 2025, sstaub
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,6 @@
 #define LCD_I2C_H
 
 #include "Arduino.h"
-#include "util/delay.h"
 #include "Print.h"
 #include "Wire.h"
 
@@ -73,9 +72,11 @@
 #define LCD_BACKLIGHT_ON 0x08
 #define LCD_BACKLIGHT_OFF 0x00
 
-#define EN B00000100  // Enable bit
-#define RW B00000010  // Read/Write bit
-#define RS B00000001  // Register select bit
+#define EN 0b00000100  // Enable bit
+#define RW 0b00000010  // Read/Write bit
+#define RS 0b00000001  // Register select bit
+
+#define OFFSET 1
 
 typedef enum {
 	DISPLAY_ON,
@@ -92,31 +93,54 @@ typedef enum {
 	AUTOSCROLL_OFF,
 	BACKLIGHT_ON,
 	BACKLIGHT_OFF,
-	} mode_t;
+	} dispmode_t;
 
 class LCDi2c : public Print {
 	public:
 		/**
 		 * @brief construct a new LCD object
 		 * 
-		 * @param address I2C address
+		 * @param address I2C address, default 0x27
+		 * @param wire interface, e.g. Wire, Wire1 ..., default Wire
 		 */
-		LCDi2c (uint8_t address);
+		LCDi2c (uint8_t i2cAddr = 0x27, TwoWire &wire = Wire);
 
 		/**
 		 * @brief start using the lcd display
 		 * 
-		 * @param cols default 16
-		 * @param lines default 2
+		 * @param rows default 2
+		 * @param columns default 16
 		 * @param dotsize default LCD_5x8DOTS some displays have also LCD_5x10DOTS
 		 */
-		void begin(uint8_t columns = 16, uint8_t rows = 2, uint8_t dotsize = LCD_5x8DOTS);
+		void begin(uint8_t rows = 2, uint8_t columns = 16, uint8_t dotsize = LCD_5x8DOTS);
 
 		/**
-		 * @brief clear display, set cursor position to zero
+		 * @brief clear display, reset cursor position first row / column
 		 * 
 		 */
 		void cls();
+
+		/**
+		 * @brief clear row, set cursor position of the row to the first position
+		 * 
+		 * @param row number of the row
+		 */
+		void clr(uint8_t row);
+
+		/**
+		 * @brief clear part, set cursor position of the row to first column
+		 * 
+		 * @param row number of the row
+		 * @param column number of the column
+		 * @param numbers of chars to delete
+		 */
+		void clp(uint8_t row, uint8_t column, uint8_t numbers);
+
+		/**
+		 * @brief set cursor position to home position
+		 * 
+		 */
+		void home();
 
 		/**
 		 * @brief set display modes
@@ -134,23 +158,16 @@ class LCDi2c : public Print {
 		 * - RIGHT_TO_LEFT This is for text that flows Right to Left
 		 * - AUTOSCROLL_ON This will 'right justify' text from the cursor
 		 * - AUTOSCROLL_OFF This will 'left justify' text from the cursor
-		 * 
 		 */
-		void display(mode_t mode);
+		void display(dispmode_t mode);
 
 		/**
 		 * @brief set the cursor to a given position
 		 * 
-		 * @param col 
-		 * @param line 
+		 * @param row number of the row
+		 * @param column number of the column
 		 */
-		void locate(uint8_t column, uint8_t row);
-
-		/**
-		 * @brief set cursor position to home position 0/0
-		 * 
-		 */
-		void home();
+		void locate(uint8_t row, uint8_t column);
 
 		/**
 		 * @brief create a user defined char object 
@@ -163,11 +180,11 @@ class LCDi2c : public Print {
 		/**
 		 * @brief writes a single char to a given position
 		 * 
-		 * @param column 
-		 * @param row 
-		 * @param c 
+		 * @param row number of the row
+		 * @param column number of the column
+		 * @param c char to print
 		 */
-		void character(uint8_t column, uint8_t row, char c);
+		void character(uint8_t row, uint8_t column, char c);
 
 		/**
 		 * @brief prints a formated string
@@ -189,14 +206,14 @@ class LCDi2c : public Print {
 		void command(uint8_t value);
 		void pulseEnable(uint8_t value);
 
-		uint8_t address;
+		TwoWire *wire;
+		uint8_t i2cAddr;
 		uint8_t displayfunction;
 		uint8_t displaycontrol;
 		uint8_t displaymode;
 		uint8_t backlight;
 		uint8_t columns;
 		uint8_t rows;
-		uint8_t dotsize;
 		uint8_t rowOffsets[4];
 	};
 
