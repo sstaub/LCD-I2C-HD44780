@@ -277,7 +277,7 @@ Set the modes and functions of the display.
 
 ### **character()**
 ```cpp
-void character(uint8_t column, uint8_t row, uint8_t c)
+void character(uint8_t row, uint8_t column, uint8_t c)
 ```
 - **row** row
 - **column** column
