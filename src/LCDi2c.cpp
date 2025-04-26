@@ -47,7 +47,7 @@ void LCDi2c::cls() {
 	}
 
 void LCDi2c::clr(uint8_t row) {
-	for (uint8_t pos = 0; pos < columns; pos++) {
+	for (uint8_t pos = 0; pos <= columns; pos++) {
 		locate(row, pos);
 		write(' ');
 		}
